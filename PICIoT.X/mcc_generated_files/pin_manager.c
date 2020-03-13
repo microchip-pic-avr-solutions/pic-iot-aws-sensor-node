@@ -85,7 +85,7 @@ void PIN_MANAGER_Initialize (void)
     IOCPDC = 0x0000;
     IOCPUA = 0x1480;
     IOCPUB = 0x0000;
-    IOCPUC = 0x0000;
+    IOCPUC = 0x0200;
 
     /****************************************************************************
      * Setting the Open Drain SFR(s)
