@@ -50,7 +50,7 @@ Devices: \| **PIC24FJ128GA705(MCU)** \| **WINC1510(Wi-Fi®)** \| **ECC608(Crypto
      + This page can be also be found via launching the **CLICK-ME.HTM** file on the **CURIOSITY** device.
      + This page can be also be found by scanning the QR code on the back of the development board. 
 
-     ![Connecting](images/awsLeverage.png)
+     ![Connecting](images/picawsLeverage.png)
 
   8. There will be (2) scrolling graphs visible.
       + (1) shows temperature sensor
@@ -281,7 +281,7 @@ General Out-Of-Box operation is as described below:
 
   2. The **BLUE LED** will begin to blink, this indicates the board is attempting to join the local **ACCESS POINT**.
 
-     ![Connecting_2](images/awsLeverage.png)
+     ![Connecting_2](images/picawsLeverage.png)
 
   3. Update the Wi-Fi Credentials; upon connecting the blinking will stop, and the **LED** will become **STATIC**. Below are the easiest methods to update credentials.
      + The board will appear on the PC enumerated as a mass storage device under the name **CURIOSITY**. Credentials can be downloaded as the file **WIFI.CFG** using the **CLICK-ME.HTM** file stored on the **CURIOSITY** device.
