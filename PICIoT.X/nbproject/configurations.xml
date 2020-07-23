@@ -82,8 +82,6 @@
           <itemPath>mcc_generated_files/CryptoAuthenticationLibrary/atca_device.h</itemPath>
           <itemPath>mcc_generated_files/CryptoAuthenticationLibrary/atca_iface.h</itemPath>
           <itemPath>mcc_generated_files/CryptoAuthenticationLibrary/atca_bool.h</itemPath>
-          <itemPath>mcc_generated_files/CryptoAuthenticationLibrary/CryptoAuth_init.h</itemPath>
-          <itemPath>mcc_generated_files/CryptoAuthenticationLibrary/cryptoauthlib_config.h</itemPath>
         </logicalFolder>
         <logicalFolder name="drivers" displayName="drivers" projectFiles="true">
           <itemPath>mcc_generated_files/drivers/i2c_simple_master.h</itemPath>
@@ -169,6 +167,8 @@
         <itemPath>mcc_generated_files/traps.h</itemPath>
         <itemPath>mcc_generated_files/spi1_driver.h</itemPath>
         <itemPath>mcc_generated_files/time_service.h</itemPath>
+        <itemPath>mcc_generated_files/CryptoAuth_init.h</itemPath>
+        <itemPath>mcc_generated_files/cryptoauthlib_config.h</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
@@ -281,7 +281,6 @@
           <itemPath>mcc_generated_files/CryptoAuthenticationLibrary/atca_cfgs.c</itemPath>
           <itemPath>mcc_generated_files/CryptoAuthenticationLibrary/atca_device.c</itemPath>
           <itemPath>mcc_generated_files/CryptoAuthenticationLibrary/atca_iface.c</itemPath>
-          <itemPath>mcc_generated_files/CryptoAuthenticationLibrary/CryptoAuth_init.c</itemPath>
         </logicalFolder>
         <logicalFolder name="drivers" displayName="drivers" projectFiles="true">
           <itemPath>mcc_generated_files/drivers/i2c_simple_master.c</itemPath>
@@ -350,6 +349,7 @@
         <itemPath>mcc_generated_files/traps.c</itemPath>
         <itemPath>mcc_generated_files/spi1_driver.c</itemPath>
         <itemPath>mcc_generated_files/time_service.c</itemPath>
+        <itemPath>mcc_generated_files/CryptoAuth_init.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
     </logicalFolder>

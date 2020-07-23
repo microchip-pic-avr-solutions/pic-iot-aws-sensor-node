@@ -29,35 +29,36 @@
 #ifndef LED_H_
 #define LED_H_
 #include <stdint.h>
-#include <stdbool.h>
 
-#define LED_ON_STATIC   0x00        // OFF
-#define LED_BLINK       0x55        // On-Off @ 250 mSec Interval
-#define LED_BLIP        0x33        // On 500 @ mSec mSec Interval
-#define LED_1_SEC_ON    0x0F        // On 1 Sec, Off Remaining
-#define LED_OFF_STATIC  0xFF
+#define SOLID_ON        (1)
+#define SOLID_OFF       (0)
+#define LED_BLINK       (250) //ms
+#define LED_BLIP        (500) //ms
+#define LED_1_SEC_ON    (1000) //ms
 
-typedef union
+typedef enum
 {
-    uint8_t Full2Sec;
-    struct
-    {
-        unsigned tick0 : 1;
-        unsigned tick1 : 1;
-        unsigned tick2 : 1;
-        unsigned tick3 : 1;
-        unsigned tick4 : 1;
-        unsigned tick5 : 1;
-        unsigned tick6 : 1;
-        unsigned tick7 : 1;
-    };
-} ledTickState_t;
+    RED = 0,
+    YELLOW = 1,
+    GREEN = 2,
+    BLUE = 3
+} ledList_type;
 
-void LED_serviceInit();
+
+typedef struct
+{
+    uint32_t onTime;
+    uint32_t offTime;
+    ledList_type ledColor;
+} ledControl_type;
+
+// All LEDs are off at start-up
+extern ledControl_type ledParameterBlue;
+extern ledControl_type ledParameterGreen;
+extern ledControl_type ledParameterYellow;
+extern ledControl_type ledParameterRed;
+
+void LED_control(ledControl_type *ledParameters);
 void LED_test(void);
 
-void LED_modeRed(ledTickState_t configLed_2SecLoop);
-void LED_modeBlue(ledTickState_t configLed_2SecLoop);
-void LED_modeGreen(ledTickState_t configLed_2SecLoop);
-void LED_modeYellow(ledTickState_t configLed_2SecLoop);
 #endif /* LED_H_ */

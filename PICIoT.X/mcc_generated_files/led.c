@@ -25,289 +25,213 @@
     SOFTWARE.
 */
 
-#include <stdbool.h>
 #include "mcc.h"
 #include "delay.h"
 #include "led.h"
 #include "drivers/timeout.h"
 #include "config/mqtt_config.h"
 
-#define LED_ON				false
-#define LED_OFF				true
-#define LEDS_TEST_INTERVAL	50L
-#define LED_SERVICE_INTERVAL 250L
 
-static ledTickState_t redLed_2SecLoop;
-static ledTickState_t yellowLed_2SecLoop;
-static ledTickState_t greenLed_2SecLoop;
-static ledTickState_t blueLed_2SecLoop;
+#define LEDS_TEST_INTERVAL	(50L)
+#define LED_ON              (0)
+#define LED_OFF             (1)
 
-static uint8_t redTicker = 0;
-static uint8_t yellowTicker = 0;
-static uint8_t greenTicker = 0;
-static uint8_t blueTicker = 0;
+// All LEDs are off at start-up
+ledControl_type ledParameterBlue = {SOLID_OFF, SOLID_ON, BLUE};
+ledControl_type ledParameterGreen = {SOLID_OFF, SOLID_ON, GREEN};
+ledControl_type ledParameterYellow = {SOLID_OFF, SOLID_ON, YELLOW};
+ledControl_type ledParameterRed = {SOLID_OFF, SOLID_ON, RED};
 
-static uint32_t LED_service(void *payload);
-static timerstruct_t LED_service_timer = {LED_service};
+static timerStruct_t onTimerBlue;
+static timerStruct_t offTimerBlue;
+static timerStruct_t onTimerGreen;
+static timerStruct_t offTimerGreen;
+static timerStruct_t onTimerYellow;
+static timerStruct_t offTimerYellow;
+static timerStruct_t onTimerRed;
+static timerStruct_t offTimerRed;
+
+static uint32_t LED_onServiceBlue(void *payload);
+static uint32_t LED_offServiceBlue(void *payload);
+static uint32_t LED_onServiceGreen(void *payload);
+static uint32_t LED_offServiceGreen(void *payload);
+static uint32_t LED_onServiceYellow(void *payload);
+static uint32_t LED_offServiceYellow(void *payload);
+static uint32_t LED_onServiceRed(void *payload);
+static uint32_t LED_offServiceRed(void *payload);
 
 
 
-void LED_modeRed(ledTickState_t configLed_2SecLoop)
+static uint32_t LED_onServiceBlue(void *payload)
 {
-    redLed_2SecLoop.Full2Sec = configLed_2SecLoop.Full2Sec;
-    redTicker = 0;    
-    }
-
-void LED_modeBlue(ledTickState_t configLed_2SecLoop)
-{
-    blueLed_2SecLoop.Full2Sec = configLed_2SecLoop.Full2Sec;
-    blueTicker = 0; 
+    ledControl_type *ledParameters = (ledControl_type *)payload;
+    timeout_create(&offTimerBlue, ledParameters->onTime);
+    LED_BLUE_SetLow();
+    return 0;      
 }
 
-void LED_modeGreen(ledTickState_t configLed_2SecLoop)
+
+static uint32_t LED_offServiceBlue(void *payload)
 {
-    greenLed_2SecLoop.Full2Sec = configLed_2SecLoop.Full2Sec;
-    greenTicker = 0;
+    ledControl_type *ledParameters = (ledControl_type *)payload;
+    timeout_create(&onTimerBlue, ledParameters->offTime);   
+    LED_BLUE_SetHigh(); // LED is off for offTime till the onTimerBlue callback function is called
+    return 0;  
 }
 
-void LED_modeYellow(ledTickState_t configLed_2SecLoop)
+static uint32_t LED_onServiceGreen(void *payload)
 {
-    yellowLed_2SecLoop.Full2Sec = configLed_2SecLoop.Full2Sec; 
-    yellowTicker = 0;
+    ledControl_type *ledParameters = (ledControl_type *)payload;
+    timeout_create(&offTimerGreen, ledParameters->onTime);
+    LED_GREEN_SetLow();
+    return 0;      
 }
 
-static void LED_redService(void)
+
+static uint32_t LED_offServiceGreen(void *payload)
 {
-    static bool ledStatus = LED_OFF;  
-    switch(redTicker)
+    ledControl_type *ledParameters = (ledControl_type *)payload;
+    timeout_create(&onTimerGreen, ledParameters->offTime);   
+    LED_GREEN_SetHigh(); // LED is off for offTime till the onTimerGreen callback function is called
+    return 0;  
+}
+
+static uint32_t LED_onServiceYellow(void *payload)
+{
+    ledControl_type *ledParameters = (ledControl_type *)payload;
+    timeout_create(&offTimerYellow, ledParameters->onTime);
+    LED_YELLOW_SetLow();
+    return 0;      
+}
+
+
+static uint32_t LED_offServiceYellow(void *payload)
+{
+    ledControl_type *ledParameters = (ledControl_type *)payload;
+    timeout_create(&onTimerYellow, ledParameters->offTime);   
+    LED_YELLOW_SetHigh(); // LED is off for offTime till the onTimerYellow callback function is called
+    return 0;  
+}
+
+
+static uint32_t LED_onServiceRed(void *payload)
+{
+    ledControl_type *ledParameters = (ledControl_type *)payload;
+    timeout_create(&offTimerRed, ledParameters->onTime);
+    LED_RED_SetLow();
+    return 0;      
+}
+
+
+static uint32_t LED_offServiceRed(void *payload)
+{
+    ledControl_type *ledParameters = (ledControl_type *)payload;
+    timeout_create(&onTimerRed, ledParameters->offTime);   
+    LED_RED_SetHigh(); // LED is off for offTime till the onTimerRed callback function is called
+    return 0;  
+}
+
+void LED_control(ledControl_type *ledParameters)
+{
+    void *parameters = (void *)ledParameters;
+    switch(ledParameters->ledColor)
     {
-        case 0:
-            ledStatus = redLed_2SecLoop.tick0;
+        case BLUE:
+            timeout_delete(&offTimerBlue);
+            timeout_delete(&onTimerBlue);
+            if(ledParameters->offTime == 0)
+            {
+                // LED should turn solid ON
+                LED_BLUE_SetLow();
+            }
+            else if(ledParameters->onTime == 0)
+            {
+                // LED should turn solid off
+                LED_BLUE_SetHigh();
+            }
+            else
+            {
+                onTimerBlue.payload = parameters;
+                offTimerBlue.payload = parameters;
+                onTimerBlue.callbackPtr = LED_onServiceBlue;
+                offTimerBlue.callbackPtr = LED_offServiceBlue;
+
+                timeout_create(&onTimerBlue, ledParameters->onTime);
+            }
         break;
-        case 1:
-            ledStatus = redLed_2SecLoop.tick1;
+        case GREEN:
+            timeout_delete(&offTimerGreen);
+            timeout_delete(&onTimerGreen);
+            if(ledParameters->offTime == 0)
+            {
+                LED_GREEN_SetLow();
+            }
+            else if(ledParameters->onTime == 0)
+            {
+                LED_GREEN_SetHigh();
+            }
+            else
+            {
+                onTimerGreen.payload = parameters;
+                offTimerGreen.payload = parameters;
+                onTimerGreen.callbackPtr = LED_onServiceGreen;
+                offTimerGreen.callbackPtr = LED_offServiceGreen;
+
+                timeout_create(&onTimerGreen, ledParameters->onTime);
+            }
         break;
-        case 2:
-            ledStatus = redLed_2SecLoop.tick2;
+        case YELLOW:            
+            timeout_delete(&offTimerYellow);
+            timeout_delete(&onTimerYellow);
+            if(ledParameters->offTime == 0)
+            {
+                LED_YELLOW_SetLow();
+            }
+            else if(ledParameters->onTime == 0)
+            {
+                LED_YELLOW_SetHigh();
+            }
+            else
+            {
+                onTimerYellow.payload = parameters;
+                offTimerYellow.payload = parameters;
+                onTimerYellow.callbackPtr = LED_onServiceYellow;
+                offTimerYellow.callbackPtr = LED_offServiceYellow;
+
+                timeout_create(&onTimerYellow, ledParameters->onTime);
+            }
         break;
-        case 3:
-            ledStatus = redLed_2SecLoop.tick3;
-        break;
-        case 4:
-            ledStatus = redLed_2SecLoop.tick4;
-        break;
-        case 5:
-            ledStatus = redLed_2SecLoop.tick5;
-        break;
-        case 6:
-            ledStatus = redLed_2SecLoop.tick6;
-        break;
-        case 7:
-            ledStatus = redLed_2SecLoop.tick7;
+        case RED:
+            timeout_delete(&offTimerRed);
+            timeout_delete(&onTimerRed);
+            if(ledParameters->offTime == 0)
+            {
+                LED_RED_SetLow();
+            }
+            else if(ledParameters->onTime == 0)
+            {
+                LED_RED_SetHigh();
+            }
+            else
+            {
+                onTimerRed.payload = parameters;
+                offTimerRed.payload = parameters;
+                onTimerRed.callbackPtr = LED_onServiceRed;
+                offTimerRed.callbackPtr = LED_offServiceRed;
+
+                timeout_create(&onTimerRed, ledParameters->onTime);
+            }
         break;
         default:
-            // This should never be true
-        break;  
-}
-
-    // Manage LED State
-    if (ledStatus == LED_ON)
-{
-        LED_RED_SetLow();
-}
-    else
-    {
-        LED_RED_SetHigh();
-    }
-
-    // Reset Ticker
-    if (redTicker >= 7)
-{
-        redTicker = 0;
-    }
-    else
-    {
-        redTicker++;
+        break;
     }
 }
 
-static void LED_yellowService(void)
-{
-    static bool ledStatus = LED_OFF;
-    switch(yellowTicker)
-    {
-        case 0:
-        ledStatus = yellowLed_2SecLoop.tick0;
-        break;
-        case 1:
-        ledStatus = yellowLed_2SecLoop.tick1;
-        break;
-        case 2:
-        ledStatus = yellowLed_2SecLoop.tick2;
-        break;
-        case 3:
-        ledStatus = yellowLed_2SecLoop.tick3;
-        break;
-        case 4:
-        ledStatus = yellowLed_2SecLoop.tick4;
-        break;
-        case 5:
-        ledStatus = yellowLed_2SecLoop.tick5;
-        break;
-        case 6:
-        ledStatus = yellowLed_2SecLoop.tick6;
-        break;
-        case 7:
-        ledStatus = yellowLed_2SecLoop.tick7;
-        break;
-        default:
-        // This should never be true
-        break;
-}
-
-    // Manage LED State
-    if (ledStatus == LED_ON)
-{
-        LED_YELLOW_SetLow();
-    }
-    else
-    {
-        LED_YELLOW_SetHigh();
-    }
-
-    // Reset Ticker
-    if (yellowTicker >= 7)
-    {
-        yellowTicker = 0;
-}
-    else
-    {
-        yellowTicker++;
-    }
-}
-
-static void LED_greenService(void)
-{
-    static bool ledStatus = LED_OFF;
-    switch(greenTicker)
-    {
-        case 0:
-        ledStatus = greenLed_2SecLoop.tick0;
-        break;
-        case 1:
-        ledStatus = greenLed_2SecLoop.tick1;
-        break;
-        case 2:
-        ledStatus = greenLed_2SecLoop.tick2;
-        break;
-        case 3:
-        ledStatus = greenLed_2SecLoop.tick3;
-        break;
-        case 4:
-        ledStatus = greenLed_2SecLoop.tick4;
-        break;
-        case 5:
-        ledStatus = greenLed_2SecLoop.tick5;
-        break;
-        case 6:
-        ledStatus = greenLed_2SecLoop.tick6;
-        break;
-        case 7:
-        ledStatus = greenLed_2SecLoop.tick7;
-        break;
-        default:
-        // This should never be true
-        break;
-}
-
-    // Manage LED State
-    if (ledStatus == LED_ON)
-{
-        LED_GREEN_SetLow();
-    }
-    else
-    {
-        LED_GREEN_SetHigh();
-    }
-
-    // Reset Ticker
-    if (greenTicker >= 7)
-    {
-        greenTicker = 0;
-    }
-    else
-    {
-        greenTicker++;
-    }
-}
-
-static void LED_blueService(void)
-{
-    static bool ledStatus = LED_OFF;
-    switch(blueTicker)
-    {
-        case 0:
-        ledStatus = blueLed_2SecLoop.tick0;
-        break;
-        case 1:
-        ledStatus = blueLed_2SecLoop.tick1;
-        break;
-        case 2:
-        ledStatus = blueLed_2SecLoop.tick2;
-        break;
-        case 3:
-        ledStatus = blueLed_2SecLoop.tick3;
-        break;
-        case 4:
-        ledStatus = blueLed_2SecLoop.tick4;
-        break;
-        case 5:
-        ledStatus = blueLed_2SecLoop.tick5;
-        break;
-        case 6:
-        ledStatus = blueLed_2SecLoop.tick6;
-        break;
-        case 7:
-        ledStatus = blueLed_2SecLoop.tick7;
-        break;
-        default:
-        // This should never be true
-        break;
-}
-
-    // Manage LED State
-    if (ledStatus == LED_ON)
-{
-        LED_BLUE_SetLow();
-    }
-    else
-    {
-        LED_BLUE_SetHigh();
-    }
-
-    // Reset Ticker
-    if (blueTicker >= 7)
-    {
-        blueTicker = 0;
-}
-    else
-    {
-        blueTicker++;
-    }
-} 
-
-static uint32_t LED_service(void *payload)
-{
-    LED_redService();
-    LED_blueService();
-    LED_greenService();
-    LED_yellowService();
-    return LED_SERVICE_INTERVAL;
-}
 
 static void testSequence (uint8_t ledState)
 {
-    if(LED_OFF == ledState){
+    if(LED_OFF == ledState)
+    {
         LED_BLUE_SetHigh();
         DELAY_milliseconds(LEDS_TEST_INTERVAL);
         LED_GREEN_SetHigh();
@@ -316,7 +240,9 @@ static void testSequence (uint8_t ledState)
         DELAY_milliseconds(LEDS_TEST_INTERVAL);
         LED_RED_SetHigh();
         DELAY_milliseconds(LEDS_TEST_INTERVAL);
-    } else {
+    } 
+    else 
+    {
         LED_BLUE_SetLow();
         DELAY_milliseconds(LEDS_TEST_INTERVAL);
         LED_GREEN_SetLow();
@@ -330,11 +256,6 @@ static void testSequence (uint8_t ledState)
 
 void LED_test(void)
 {
-	testSequence(LED_ON);
-	testSequence(LED_OFF);
-}
-
-void LED_serviceInit(void)
-{
-    timeout_create(&LED_service_timer, LED_SERVICE_INTERVAL);
+    testSequence(LED_ON);
+    testSequence(LED_OFF);
 }

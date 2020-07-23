@@ -39,6 +39,6 @@ void Time_endTask(void);
 uint32_t TIME_getOffset_UNIX(void);
 char  *TIME_GetcTime(uint32_t timeToConvert);
 int32_t TIME_getDiffTime(int32_t diffTime1, int32_t diffTime0);
-uint32_t TIME_ntpTimeStamp(tstrSystemTime* WINCTime);
+void TIME_ntpTimeStamp(tstrSystemTime* WINCTime);
 
 #endif /* TIME_SERVICE_H_ */

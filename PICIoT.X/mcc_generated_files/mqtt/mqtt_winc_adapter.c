@@ -68,20 +68,6 @@ typedef enum
 	WINC_SOCK_ERR_BUFFER_FULL = -14,
 }wincSocketResponses_t;
 
-typedef enum
-{
-	WINC_SO_SSL_BYPASS_X509_VERIF = 1,
-	WINC_SO_SSL_SNI = 2,
-	WINC_SO_SSL_ENABLE_SESSION_CACHING = 3,
-	WINC_SO_SSL_ENABLE_SNI_VALIDATION = 4,
-}wincSupportedSockOptions;
-
-typedef enum
-{
-	WINC_SOL_SOCKET = 1,
-	WINC_SOL_SSL_SOCKET = 2,
-}wincSupportedSockLevel;
-
 /*******************WINC specific socket address structure***************************/
 typedef struct {
     uint16_t		sa_family;		//Socket address
@@ -566,8 +552,8 @@ int BSD_setsockopt(int socket, int level, int optname, const void *optval, sockl
 
 	switch((wincSupportedSockLevel)level)
 	{
-		case WINC_SOL_SOCKET:
-		case WINC_SOL_SSL_SOCKET:
+		case BSD_SOL_SOCKET:
+		case BSD_SOL_SSL_SOCKET:
 			wincSockLevel = level;
 		break;
 		default:
@@ -577,10 +563,10 @@ int BSD_setsockopt(int socket, int level, int optname, const void *optval, sockl
 	}
 	switch((wincSupportedSockOptions)optname)
 	{
-		case WINC_SO_SSL_BYPASS_X509_VERIF:
-		case WINC_SO_SSL_SNI:
-		case WINC_SO_SSL_ENABLE_SESSION_CACHING:
-		case WINC_SO_SSL_ENABLE_SNI_VALIDATION:
+		case BSD_SO_SSL_BYPASS_X509_VERIF:
+		case BSD_SO_SSL_SNI:
+		case BSD_SO_SSL_ENABLE_SESSION_CACHING:
+		case BSD_SO_SSL_ENABLE_SNI_VALIDATION:
 			wincSockOptions = optname;
 		break;
 		default:

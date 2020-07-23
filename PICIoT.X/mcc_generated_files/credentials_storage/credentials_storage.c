@@ -30,8 +30,8 @@
 #include <stdlib.h>
 #include "credentials_storage.h"
 
-char ssid[MAX_WIFI_CREDENTIALS_LENGTH];
-char pass[MAX_WIFI_CREDENTIALS_LENGTH];
+char ssid[M2M_MAX_SSID_LEN];
+char pass[M2M_MAX_PSK_LEN];
 char authType[2];
 char ntpServerName[MAX_NTP_SERVER_LENGTH];
 

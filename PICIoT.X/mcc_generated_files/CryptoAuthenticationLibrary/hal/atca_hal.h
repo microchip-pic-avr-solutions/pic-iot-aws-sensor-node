@@ -33,6 +33,7 @@
 #include "atca_iface.h"
 #include "atca_start_config.h"
 #include "atca_start_iface.h"
+#include "../cryptoauthlib_config.h"
 
 /** \defgroup hal_ Hardware abstraction layer (hal_)
  *

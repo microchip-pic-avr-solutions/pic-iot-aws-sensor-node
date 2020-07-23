@@ -37,6 +37,7 @@
 #include "../cloud/crypto_client/crypto_client.h"
 #include "../credentials_storage/credentials_storage.h"
 #include "../mqtt/mqtt_core/mqtt_core.h"
+#include "../winc/m2m/m2m_types.h"
 #include "../debug_print.h"
 #include "../cloud/wifi_service.h"
 #include "../mqtt/mqtt_comm_bsd/mqtt_comm_layer.h"
@@ -45,13 +46,14 @@
 #include "../cloud/cloud_interface.h"
 #include "../cloud/mqtt_service.h"
 
-#define WIFI_PARAMS_OPEN    1
-#define WIFI_PARAMS_PSK     2
-#define WIFI_PARAMS_WEP     3
-#define MAX_COMMAND_SIZE        100
-#define MAX_PUB_KEY_LEN         200
+#define WIFI_PARAMS_OPEN        (1)
+#define WIFI_PARAMS_PSK         (2)
+#define WIFI_PARAMS_WEP         (3)
+#define MAX_COMMAND_SIZE        (100)
+#define MAX_PUB_KEY_LEN         (200)
+#define CLI_TASK_INTERVAL       (50)
 #define NEWLINE "\r\n"
-#define KEY_OR_THING "thing"
+#define KEY_OR_THING            "thing"
 #define UNKNOWN_CMD_MSG "--------------------------------------------" NEWLINE\
                         "Unknown command. List of available commands:" NEWLINE\
                         "reset"NEWLINE\
@@ -69,14 +71,15 @@ static bool isCommandReceived = false;
 static uint8_t index = 0;
 static bool commandTooLongFlag = false;
 
-const char * const cli_version_number             = "1.0";
-const char * const firmware_version_number        = "2.0.2";
+const char * const cli_option_version_number      = "1.0.1";
+
+const char * const firmware_version_number        = "4.1.0";
 
 static void command_received(char *command_text);
 static void reset_cmd(char *pArg);
 static void reconnect_cmd(char *pArg);
 static void set_wifi_auth(char *ssid_pwd_auth);
-static void get_thing_id(char *pArg);
+static void get_thing_name(char *pArg);
 static void get_device_id(char *pArg);
 static void get_cli_version(char *pArg);
 static void get_firmware_version(char *pArg);
@@ -84,7 +87,6 @@ static void set_debug_level(char *pArg);
 static bool endOfLineTest(char c);
 static void enableUsartRxInterrupts(void);
 
-#define CLI_TASK_INTERVAL      50
 
 uint32_t CLI_task(void*);
 timerStruct_t CLI_task_timer             = {CLI_task};
@@ -100,7 +102,7 @@ const struct cmd commands[] =
     { "reset",       reset_cmd},
     { "reconnect",   reconnect_cmd },
     { "wifi",        set_wifi_auth },
-    { "thing",       get_thing_id },
+    { "thing",       get_thing_name },
     { "device",      get_device_id },
     { "cli_version", get_cli_version },
     { "version",     get_firmware_version },
@@ -178,8 +180,7 @@ static void set_wifi_auth(char *ssid_pwd_auth)
     char *credentials[3];
     char *pch;
     uint8_t params = 0;
-	uint8_t i;
-    ledTickState_t ledState;
+    uint8_t i;
     
     for(i=0;i<=2;i++)credentials[i]='\0';
 
@@ -210,16 +211,16 @@ static void set_wifi_auth(char *ssid_pwd_auth)
     switch (params)
     {
         case WIFI_PARAMS_OPEN:
-                strncpy(ssid, credentials[0],MAX_WIFI_CREDENTIALS_LENGTH-1);
-                strcpy(pass, "\0");
-                strcpy(authType, "1");                
+            strncpy(ssid, credentials[0],M2M_MAX_SSID_LEN-1);
+            strcpy(pass, "\0");
+            strcpy(authType, "1");                
             break;
 
         case WIFI_PARAMS_PSK:
-		case WIFI_PARAMS_WEP:
-                strncpy(ssid, credentials[0],MAX_WIFI_CREDENTIALS_LENGTH-1);
-                strncpy(pass, credentials[1],MAX_WIFI_CREDENTIALS_LENGTH-1);
-                sprintf(authType, "%d", params);                
+        case WIFI_PARAMS_WEP:
+            strncpy(ssid, credentials[0],M2M_MAX_SSID_LEN-1);
+            strncpy(pass, credentials[1],M2M_MAX_PSK_LEN-1);
+            sprintf(authType, "%d", params);                
             break;
             
         default:
@@ -233,18 +234,24 @@ static void set_wifi_auth(char *ssid_pwd_auth)
         {
             MQTT_Close(MQTT_GetClientConnectionInfo());
         }        
-        if (shared_networking_params.haveSocket)    
+        if (shared_networking_params.haveDataConnection)    
         {   // Disconnect from Socket if active
-            shared_networking_params.haveSocket = 0;
+            shared_networking_params.haveDataConnection = 0;
             MQTT_Disconnect(MQTT_GetClientConnectionInfo());
         } 
-		wifi_disconnectFromAp();
-        ledState.Full2Sec = LED_OFF_STATIC;
-        LED_modeYellow(ledState);
-        LED_modeRed(ledState);
-        LED_modeGreen(ledState);
-        ledState.Full2Sec = LED_BLINK;
-        LED_modeBlue(ledState);  
+        wifi_disconnectFromAp();
+        ledParameterYellow.onTime = SOLID_OFF;
+        ledParameterYellow.offTime = SOLID_ON;
+        LED_control(&ledParameterYellow);
+        ledParameterRed.onTime = SOLID_OFF;
+        ledParameterRed.offTime = SOLID_ON;
+        LED_control(&ledParameterRed);
+        ledParameterGreen.onTime = SOLID_OFF;
+        ledParameterGreen.offTime = SOLID_ON;
+        LED_control(&ledParameterGreen);
+        ledParameterBlue.onTime = LED_BLINK;
+        ledParameterBlue.offTime = LED_BLINK;
+        LED_control(&ledParameterBlue);
 	}
 	else
 	{
@@ -254,14 +261,18 @@ static void set_wifi_auth(char *ssid_pwd_auth)
 
 static void reconnect_cmd(char *pArg)
 {
-    ledTickState_t ledState;
     (void)pArg;
-    ledState.Full2Sec = LED_OFF_STATIC;
-    LED_modeYellow(ledState);
-    LED_modeRed(ledState);
-    ledState.Full2Sec = LED_BLINK;
-    LED_modeGreen(ledState);
-    shared_networking_params.haveSocket = 0;
+    ledParameterYellow.onTime = SOLID_OFF;
+    ledParameterYellow.offTime = SOLID_ON;
+    LED_control(&ledParameterYellow);
+    ledParameterRed.onTime = SOLID_OFF;
+    ledParameterRed.offTime = SOLID_ON;
+    LED_control(&ledParameterRed);
+    ledParameterGreen.onTime = LED_BLINK;
+    ledParameterGreen.offTime = LED_BLINK;
+    LED_control(&ledParameterGreen);
+    
+    shared_networking_params.haveDataConnection = 0;
     MQTT_Disconnect(MQTT_GetClientConnectionInfo());
     printf("OK\r\n");
 }
@@ -288,7 +299,7 @@ static void set_debug_level(char *pArg)
    }
 }
 
-static void get_thing_id(char *pArg)
+static void get_thing_name(char *pArg)
 {
     (void)pArg;
         
@@ -298,7 +309,7 @@ static void get_thing_id(char *pArg)
     }
     else
     {
-        printf("Error getting Thing ID.\r\n\4");
+        printf("Error getting Thing Name.\r\n\4");
     }
 }
 
@@ -324,7 +335,7 @@ static void get_device_id(char *pArg)
 static void get_cli_version(char *pArg)
 {
     (void)pArg;
-    printf("v%s\r\n\4", cli_version_number);
+    printf("v%s\r\n\4", cli_option_version_number);
 }
 
 static void get_firmware_version(char *pArg)
@@ -335,11 +346,12 @@ static void get_firmware_version(char *pArg)
 
 static void command_received(char *command_text)
 {
-    char *argument = strstr(command_text, " ");
     uint8_t cmp;
     uint8_t ct_len;
     uint8_t cc_len;
-	uint8_t i = 0;
+    uint8_t cmdIndex = 0;
+
+    char *argument = strstr(command_text, " ");
 
     if (argument != NULL)
     {
@@ -349,17 +361,17 @@ static void command_received(char *command_text)
         argument++;
     }
 
-    for (i = 0; i < sizeof(commands)/sizeof(*commands); i++)
+    for (cmdIndex = 0; cmdIndex < sizeof(commands)/sizeof(*commands); cmdIndex++)
     {
-        cmp = strcmp(command_text, commands[i].command);
+        cmp = strcmp(command_text, commands[cmdIndex].command);
         ct_len = strlen(command_text);        
-        cc_len = strlen(commands[i].command);
+        cc_len = strlen(commands[cmdIndex].command);
 
         if (cmp == 0 && ct_len == cc_len)
         {
-            if (commands[i].handler != NULL)
+            if (commands[cmdIndex].handler != NULL)
             {
-                commands[i].handler(argument);
+                commands[cmdIndex].handler(argument);
                 return;
             }
         }

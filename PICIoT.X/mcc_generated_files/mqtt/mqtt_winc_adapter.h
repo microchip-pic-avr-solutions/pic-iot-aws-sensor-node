@@ -78,6 +78,20 @@ typedef enum
 	BSD_SOCK_PACKET,
 }bsdTypes_t;
 
+typedef enum
+{
+	BSD_SO_SSL_BYPASS_X509_VERIF = 1,
+	BSD_SO_SSL_SNI = 2,
+	BSD_SO_SSL_ENABLE_SESSION_CACHING = 3,
+	BSD_SO_SSL_ENABLE_SNI_VALIDATION = 4,
+}wincSupportedSockOptions;
+
+typedef enum
+{
+	BSD_SOL_SOCKET = 1,
+	BSD_SOL_SSL_SOCKET = 2,
+}wincSupportedSockLevel;
+
 /************** (END) BSD Type Defined Enumerators (END) *******************/
 
 /***************** Error Number Defined Enumerators **********************/

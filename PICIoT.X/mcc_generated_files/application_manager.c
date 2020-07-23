@@ -35,11 +35,12 @@ SOFTWARE.
 #include "config/IoT_Sensor_Node_config.h"
 #include "config/conf_winc.h"
 #include "config/mqtt_config.h"
+#include "config/cloud_config.h"
 #include "cloud/cloud_service.h"
 #include "cloud/mqtt_service.h"
 #include "cloud/crypto_client/crypto_client.h"
 #include "cloud/wifi_service.h"
-#include "CryptoAuthenticationLibrary/CryptoAuth_init.h"
+#include "CryptoAuth_init.h"
 #include "../mcc_generated_files/sensors_handling.h"
 #include "credentials_storage/credentials_storage.h"
 #include "led.h"
@@ -59,6 +60,7 @@ SOFTWARE.
 #define TOGGLE_OFF 0
 #define DEVICE_SHADOW_INIT_INTERVAL 1000L
 #define UPDATE_DEVICE_SHADOW_BUFFER_TIME (2)
+#define AWS_MCHP_SANDBOX_URL "a1gqt8sttiign3.iot.us-east-2.amazonaws.com"
 static uint8_t toggleState = 0;
 
 // This will contain the device ID, before we have it this dummy value is the init value which is non-0
@@ -79,13 +81,17 @@ static void setToggleState(uint8_t passedToggleState);
 static uint8_t getToggleState(void);
 uint32_t initDeviceShadow(void *payload);
 timerStruct_t initDeviceShadowTimer = {initDeviceShadow};
+#if USE_CUSTOM_ENDPOINT_URL
+void loadCustomAWSEndpoint(void);
+#else
+void loadDefaultAWSEndpoint(void);
+#endif
 
 // This will get called every 1 second only while we have a valid Cloud connection
 static void sendToCloud(void)
 {
     static char json[PAYLOAD_SIZE];
     static char publishMqttTopic[PUBLISH_TOPIC_SIZE];
-    ledTickState_t ledState;
     int rawTemperature = 0;
     int light = 0;
     int len = 0;    
@@ -107,10 +113,10 @@ static void sendToCloud(void)
         }
         else
         {
-            ledState.Full2Sec = LED_BLIP;
-            LED_modeYellow(ledState);
+            ledParameterYellow.onTime = LED_BLIP;
+            ledParameterYellow.offTime = LED_BLIP;
+            LED_control(&ledParameterYellow);
         }
-        
     }
 }
 
@@ -119,7 +125,6 @@ static void receivedFromCloud(uint8_t *topic, uint8_t *payload)
 {
     char *toggleToken = "\"toggle\":";
     char *subString;
-    ledTickState_t ledState;
    sprintf(mqttSubscribeTopic, "$aws/things/%s/shadow/update/delta", cid);
     if (strncmp((void*) mqttSubscribeTopic, (void*) topic, strlen(mqttSubscribeTopic)) == 0) 
     {
@@ -128,30 +133,31 @@ static void receivedFromCloud(uint8_t *topic, uint8_t *payload)
             if (subString[strlen(toggleToken)] == '1')
             {   
                 setToggleState(TOGGLE_ON);
-                ledState.Full2Sec = LED_ON_STATIC;
-                LED_modeYellow(ledState);
+                ledParameterYellow.onTime = SOLID_ON;
+                ledParameterYellow.offTime = SOLID_OFF;
+                LED_control(&ledParameterYellow);
             }
             else
             {
                 setToggleState(TOGGLE_OFF);
-                ledState.Full2Sec = LED_OFF_STATIC;
-                LED_modeYellow(ledState);
+                ledParameterYellow.onTime = SOLID_OFF;
+                ledParameterYellow.offTime = SOLID_ON;
+                LED_control(&ledParameterYellow);
             }
             holdCount = 2;
         }
     }
-    debug_printer(SEVERITY_NONE, LEVEL_NORMAL, "topic: %s", topic);
-    debug_printer(SEVERITY_NONE, LEVEL_NORMAL, "payload: %s", payload);
+    debug_printIoTAppMsg("topic: %s", topic);
+    debug_printIoTAppMsg("payload: %s", payload);
     updateDeviceShadow();
 }
 
-void application_init()
+void application_init(void)
 {
 	uint8_t mode = WIFI_DEFAULT;
 	uint32_t sw0CurrentVal = 0;
 	uint32_t sw1CurrentVal = 0;
 	uint32_t i = 0;
-    ledTickState_t ledState;
 
     // Initialization of modules before interrupts are enabled
     SYSTEM_Initialize();
@@ -199,8 +205,12 @@ void application_init()
     CLI_setdeviceId(attDeviceID);
 #endif   
     debug_setPrefix(attDeviceID);     
-    wifi_readThingIdFromWinc();
-    wifi_readAWSEndpointFromWinc();
+#if USE_CUSTOM_ENDPOINT_URL
+    loadCustomAWSEndpoint();
+#else
+    loadDefaultAWSEndpoint();
+#endif  
+    wifi_readThingNameFromWinc();
     timeout_create(&initDeviceShadowTimer, DEVICE_SHADOW_INIT_INTERVAL );    
     if(sw0CurrentVal < (SW_DEBOUNCE_INTERVAL/2))
     {
@@ -211,13 +221,18 @@ void application_init()
             strcpy(pass, CFG_MAIN_WLAN_PSK);
             sprintf((char*)authType, "%d", CFG_MAIN_WLAN_AUTH);
             
-            ledState.Full2Sec = LED_BLINK;
-            LED_modeGreen(ledState);
-            LED_modeBlue(ledState);
-            ledState.Full2Sec = LED_OFF_STATIC;
-            LED_modeYellow(ledState);
-            LED_modeRed(ledState);
-            
+            ledParameterBlue.onTime = LED_BLINK;
+            ledParameterBlue.offTime = LED_BLINK;
+            LED_control(&ledParameterBlue);
+            ledParameterGreen.onTime = LED_BLINK;
+            ledParameterGreen.offTime = LED_BLINK;
+            LED_control(&ledParameterGreen);
+            ledParameterYellow.onTime = SOLID_OFF;
+            ledParameterYellow.offTime = SOLID_ON;
+            LED_control(&ledParameterYellow);
+            ledParameterRed.onTime = SOLID_OFF;
+            ledParameterRed.offTime = SOLID_ON;
+            LED_control(&ledParameterRed);
             shared_networking_params.amConnectingAP = 1;
             shared_networking_params.amSoftAP = 0;
             shared_networking_params.amDefaultCred = 1;
@@ -225,12 +240,18 @@ void application_init()
         else
         {    
             // Host as SOFT AP
-            ledState.Full2Sec = LED_BLIP;
-            LED_modeBlue(ledState);
-            ledState.Full2Sec = LED_OFF_STATIC;
-            LED_modeGreen(ledState);
-            LED_modeYellow(ledState);
-            LED_modeRed(ledState);
+            ledParameterBlue.onTime = LED_BLIP;
+            ledParameterBlue.offTime = LED_BLIP;
+            LED_control(&ledParameterBlue);
+            ledParameterGreen.onTime = SOLID_OFF;
+            ledParameterGreen.offTime = SOLID_ON;
+            LED_control(&ledParameterGreen);
+            ledParameterYellow.onTime = SOLID_OFF;
+            ledParameterYellow.offTime = SOLID_ON;
+            LED_control(&ledParameterYellow);
+            ledParameterRed.onTime = SOLID_OFF;
+            ledParameterRed.offTime = SOLID_ON;
+            LED_control(&ledParameterRed);
             mode = WIFI_SOFT_AP;
             shared_networking_params.amConnectingAP = 0;
             shared_networking_params.amSoftAP = 1;
@@ -240,12 +261,18 @@ void application_init()
     else
     {    
         // Connect to AP
-        ledState.Full2Sec = LED_BLINK;
-        LED_modeBlue(ledState);
-        ledState.Full2Sec = LED_OFF_STATIC;
-        LED_modeGreen(ledState);
-        LED_modeYellow(ledState);
-        LED_modeRed(ledState);
+         ledParameterBlue.onTime = LED_BLINK;
+        ledParameterBlue.offTime = LED_BLINK;
+        LED_control(&ledParameterBlue);
+        ledParameterGreen.onTime = SOLID_OFF;
+        ledParameterGreen.offTime = SOLID_ON;
+        LED_control(&ledParameterGreen);
+        ledParameterYellow.onTime = SOLID_OFF;
+        ledParameterYellow.offTime = SOLID_ON;
+        LED_control(&ledParameterYellow);
+        ledParameterRed.onTime = SOLID_OFF;
+        ledParameterRed.offTime = SOLID_ON;
+        LED_control(&ledParameterRed);
         shared_networking_params.amConnectingAP = 1;
         shared_networking_params.amSoftAP = 0;
         shared_networking_params.amDefaultCred = 0;
@@ -259,7 +286,6 @@ void application_init()
     }
     
     LED_test();
-    LED_serviceInit();
     subscribeToCloud();
 }
 
@@ -317,6 +343,26 @@ static void updateDeviceShadow(void)
     }
 }
 
+#if USE_CUSTOM_ENDPOINT_URL
+void loadCustomAWSEndpoint(void)
+{
+    memset(awsEndpoint, '\0', AWS_ENDPOINT_LEN);
+    sprintf(awsEndpoint, "%s", CFG_MQTT_HOSTURL);
+    debug_printIoTAppMsg("Custom AWS Endpoint is used : %s", awsEndpoint);
+}
+#else
+void loadDefaultAWSEndpoint(void)
+{
+    memset(awsEndpoint, '\0', AWS_ENDPOINT_LEN);
+    wifi_readAWSEndpointFromWinc();
+    if(awsEndpoint[0] == 0xFF)
+    {
+        sprintf(awsEndpoint, "%s", AWS_MCHP_SANDBOX_URL);
+        debug_printIoTAppMsg("Using the AWS Sandbox endpoint : %s", awsEndpoint);
+    }
+}
+#endif
+
 // This scheduler will check all tasks and timers that are due and service them
 void runScheduler(void)
 {
@@ -326,7 +372,6 @@ void runScheduler(void)
 // This gets called by the scheduler approximately every 100ms
 uint32_t MAIN_dataTask(void *payload)
 {
-    ledTickState_t ledState;
     static uint32_t previousTransmissionTime = 0;
     
     // Get the current time. This uses the C standard library time functions
@@ -345,14 +390,21 @@ uint32_t MAIN_dataTask(void *payload)
             sendToCloud();
         }
     } 
+    else
+    {
+        ledParameterYellow.onTime = SOLID_OFF;
+        ledParameterYellow.offTime = SOLID_ON;
+        LED_control(&ledParameterYellow);         
+    }
     
     // Blue LED
     if (!shared_networking_params.amConnectingAP)
     {
         if (shared_networking_params.haveAPConnection)
         {
-            ledState.Full2Sec = LED_ON_STATIC;
-            LED_modeBlue(ledState);
+            ledParameterBlue.onTime = SOLID_ON;
+            ledParameterBlue.offTime = SOLID_OFF;
+            LED_control(&ledParameterBlue);  
         }
         
         // Green LED if we are in Access Point
@@ -360,8 +412,15 @@ uint32_t MAIN_dataTask(void *payload)
         {
             if(CLOUD_checkIsConnected())
             {
-                ledState.Full2Sec = LED_ON_STATIC;
-                LED_modeGreen(ledState);
+                ledParameterGreen.onTime = SOLID_ON;
+                ledParameterGreen.offTime = SOLID_OFF;
+                LED_control(&ledParameterGreen);
+            }
+            else if(shared_networking_params.haveDataConnection == 1)
+            {
+                ledParameterGreen.onTime = LED_BLINK;
+                ledParameterGreen.offTime = LED_BLINK;
+                LED_control(&ledParameterGreen);
             }
         }
     }
@@ -369,13 +428,15 @@ uint32_t MAIN_dataTask(void *payload)
     // RED LED
     if (shared_networking_params.haveError)
     {
-        ledState.Full2Sec = LED_ON_STATIC;
-        LED_modeRed(ledState);
+        ledParameterRed.onTime = SOLID_ON;
+        ledParameterRed.offTime = SOLID_OFF;
+        LED_control(&ledParameterRed);
     }
     else
     {
-        ledState.Full2Sec = LED_OFF_STATIC;
-        LED_modeRed(ledState);
+        ledParameterRed.onTime = SOLID_OFF;
+        ledParameterRed.offTime = SOLID_ON;
+        LED_control(&ledParameterRed);
     }
         
     // This is milliseconds managed by the RTC and the scheduler, this return 
@@ -395,7 +456,6 @@ static void  wifiConnectionStateChanged(uint8_t status)
     // If we have no AP access we want to retry
     if (status != 1)
     {
-        // Restart the WIFI module if we get disconnected from the WiFi Access Point (AP)
-        CLOUD_setInitFlag();
+        CLOUD_reset();
     } 
 }

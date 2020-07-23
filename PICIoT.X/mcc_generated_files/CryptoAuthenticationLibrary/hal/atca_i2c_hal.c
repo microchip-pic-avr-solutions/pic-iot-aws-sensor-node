@@ -1,31 +1,26 @@
 /*
+    (c) 2019 Microchip Technology Inc. and its subsidiaries.  
+	
+    Subject to your compliance with these terms, you may use this 
+    software and any derivatives exclusively with Microchip products. 
 
- * \file
- * \brief CryptoAuthLib Basic API methods - a simple crypto authentication API.
- * These methods manage a global ATCADevice object behind the scenes. They also
- * manage the wake/idle state transitions so callers don't need to.
- *
- * \copyright (c) 2015-2018 Microchip Technology Inc. and its subsidiaries.
- *
- * \page License
- *
- * Subject to your compliance with these terms, you may use Microchip software
- * and any derivatives exclusively with Microchip products. It is your
- * responsibility to comply with third party license terms applicable to your
- * use of third party software (including open source software) that may
- * accompany Microchip software.
- *
- * THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
- * EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
- * WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
- * PARTICULAR PURPOSE. IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT,
- * SPECIAL, PUNITIVE, INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE
- * OF ANY KIND WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF
- * MICROCHIP HAS BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE
- * FORESEEABLE. TO THE FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL
- * LIABILITY ON ALL CLAIMS IN ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED
- * THE AMOUNT OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR
- * THIS SOFTWARE.
+    THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER 
+    EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY 
+    IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS 
+    FOR A PARTICULAR PURPOSE, OR ITS INTERACTION WITH MICROCHIP PRODUCTS, 
+    COMBINATION WITH ANY OTHER PRODUCTS, OR USE IN ANY APPLICATION. 
+	
+    IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE, 
+    INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND 
+    WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP 
+    HAS BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE.  TO 
+    THE FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL 
+    CLAIMS IN ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT 
+    OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS 
+    SOFTWARE. 
+
+    MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE 
+    TERMS.
 */
 
 #include <string.h>
@@ -34,8 +29,7 @@
 #include "../atca_device.h"
 #include "../atca_status.h"
 #include "../../clock.h"
-#include "../../../mcc_generated_files/drivers/i2c_master.h"
-#include "../../../mcc_generated_files/drivers/i2c_types.h"
+
 #include "../../../mcc_generated_files/drivers/i2c_simple_master.h"
 
 #define FCY (_XTAL_FREQ/2) // instruction cycle freq
@@ -51,7 +45,6 @@ uint8_t i2c_address = 0;
 ATCA_STATUS hal_i2c_init(void *hal, ATCAIfaceCfg *cfg)
 {
         i2c_address = (cfg->atcai2c.slave_address) >> 1;
-	i2c_open(i2c_address);
 	
 	return ATCA_SUCCESS;
 }

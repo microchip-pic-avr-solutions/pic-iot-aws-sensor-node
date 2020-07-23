@@ -45,7 +45,7 @@ Devices: \| **PIC24FJ128GA705(MCU)** \| **WINC1510(Wi-Fi®)** \| **ECC608(Crypto
   6. After successfully establishing MQTT connection, the **YELLOW LED** will blink. (250 mSec)
      + Indicating data exchanged between the End-Device (PIC-IoT), and BROKER (AWS). (every (1) Sec)
 
-  7. Connect to the www.avr-iot.com/aws/**{thingName}**, or www.pic-iot.com/aws/**{thingName}**, device specific website to view publish/subscribe data. 
+  7. Connect to the www.avr-iot.com/aws/**{thingName}**, or www.pic-iot.com/aws/**{thingName}** website to view publish/subscribe data. 
      + **{thingName}** is the unique identifier for the development board.
      + This page can be also be found via launching the **CLICK-ME.HTM** file on the **CURIOSITY** device.
      + This page can be also be found by scanning the QR code on the back of the development board. 
@@ -291,6 +291,7 @@ General Out-Of-Box operation is as described below:
      + This will launch the URL: https://pic-iot.com/aws/{ThingName}. 
      + After entering credentials, the **.CFG** file is produced through the web browser. No information is shared through the internet. 
      + Drag and Drop, or Copy and Paste the **WIFI.CFG** file onto the **CURIOSITY** device to load new credentials onto the IoT demonstration board.
+	 
      
      ![WiFi Config](images/wifiNotepad.png)     
      
@@ -368,7 +369,7 @@ General Out-Of-Box operation is as described below:
 **wifi Security Options:**
 + 0 : Open - Password and Security option parameters are not required.
 + 1 : WPA/WPA2 - Security Option Parameter not required.
-+ 2: WEP -
++ 2: WEP - Network Name, Password, and Security Option (3) Parameter are required when connecting to a WEP network. For example, ‘wifi MCHP.IOT,microchip,3’.
 
 **debug Debug Options:**
 Type in a number from 0 to 4; for the number of debug messages with 0 - the result is printing no messages and with 4 for printing all the messages.
@@ -382,6 +383,25 @@ Type in a number from 0 to 4; for the number of debug messages with 0 - the resu
 The PIC-IoT development board can be accessed through a Wi-Fi access point enabled by the Software-Enabled Access mode of the WINC1510. This can be another way to connect the board to a Wi-Fi network. To enter Soft AP mode, press and hold the SW0 push button before plugging in the board. When connecting to the module hosted access point, the user will need to enter the desired SSID and password credentials for the network. After the user enters the details, pressing the Connect button will reconfigure network credentials for the device.
 
 ![Soft AP Credentials](images/softApCredentials.png)
+
+### AWS Multi Account Registration
+This [feature](https://pages.awscloud.com/iot-core-early-registration.html) is in Beta phase. The user can leverage upon the [provisioning tool](http://ww1.microchip.com/downloads/en/DeviceDoc/iotprovision-bin-1.1.11.4.zip) to register existing PIC-IoT board
+in a personal account. More information on using the provisioning tool can be found in README.txt and iotprovsion.md which are part of the tool.
+
+By default the AWS endpoint URL is read from WINC's memory. Upon using the provisioning tool the Microchip
+sandbox AWS endpoint URL present in WINC will be replaced by the personal account AWS endpoint URL. In those
+boards which do not carry the AWS endpoint URL in WINC's memory the Microchip Sandbox AWS endpoint URL provided
+in the macro ``AWS_MCHP_SANDBOX_URL`` will be used.
+
+The firmware supports the use of custom AWS endpoint URL. This feature can be enabled/disabled through the macro 
+``USE_CUSTOM_ENDPOINT_URL`` in "cloud_config.h". Enabling this feature will ensure the AWS endpoint defined by the 
+macro ``CFG_MQTT_HOSTURL`` in "mqtt_config.h" is used instead of the one present in WINC's memory for establishing 
+the connection with the cloud. To switch to the usage of default AWS endpoint present in WINC's memory, disable 
+this custom AWS endpoint URL by setting the macro ``USE_CUSTOM_ENDPOINT_URL`` to '0'.
+
+In either case of using the default or custom option,the AWS endpoint URL being used can be observed on the serial 
+terminal right before the board's start up LED cycle. Make sure to have the ``ENABLE_DEBUG_IOT_APP_MSGS`` enabled
+to get the IoT application layer specific logs printed out on the terminal,
 
 ---
 

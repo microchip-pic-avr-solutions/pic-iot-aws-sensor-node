@@ -25,12 +25,12 @@
 
 int main(void)
 {
-   application_init();
+	application_init();
 
-   while (1)
-   { 
-      runScheduler();  
-   }
+	while (1)
+	{ 
+		runScheduler();  
+	}
    
-   return 0;
+	return 0;
 }

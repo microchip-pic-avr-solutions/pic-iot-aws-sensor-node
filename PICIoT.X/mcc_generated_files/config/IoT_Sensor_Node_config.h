@@ -5,9 +5,11 @@
 
 #define CFG_TIMEOUT 5000
 
-#define CFG_DEBUG_MSG (0)
+#define CFG_DEBUG_PRINT (0)
 
 #define CFG_ENABLE_CLI (1)
+
+#define ENABLE_DEBUG_IOT_APP_MSGS (1)
 
 #define CFG_NTP_SERVER    ("*.pool.ntp.org")
 
