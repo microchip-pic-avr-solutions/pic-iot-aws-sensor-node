@@ -28,36 +28,7 @@
  * THIS SOFTWARE.
 */
 
-#include <stdbool.h>
-#include "CryptoAuth_init.h"
+#include "cryptoauthlib_config.h"
+#include "CryptoAuthenticationLibrary/cryptoauthlib.h"
 
-struct atca_command  _gmyCommand;
-struct atca_iface    _gmyIface;
-struct atca_device   _gMyDevice = {&_gmyCommand, &_gmyIface};
-
-ATCAIfaceCfg secureCfg = {
-    .iface_type             =   ATCA_I2C_IFACE,
-    .devtype                =   ATECC608A,
-    .atcai2c.slave_address  =   0xB0,
-    .atcai2c.bus            =   2,
-    .atcai2c.baud           =   100000,
-    .wake_delay             =   1560,
-    .rx_retries             =   20
-};
-
-
-bool CryptoAuth_Initialize(void)
-{
-    uint8_t calInitialzeStatus; 
-    calInitialzeStatus = atcab_init(&secureCfg);
-    if (calInitialzeStatus != ATCA_SUCCESS)
-    {
-       return false;
-    } 
-    else 
-    {
-       atcab_lock_data_slot(0);
-       return true;
-    }
-}
-
+bool CryptoAuth_Initialize(void);

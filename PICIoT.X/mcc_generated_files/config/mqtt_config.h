@@ -36,13 +36,6 @@
 #define SUBSCRIBE_TOPIC_SIZE        100     //Defines the topic length that is supported when we process a published packet from the cloud
 #define PAYLOAD_SIZE                200     //Defines the payload size that is supported when we process a published packet
 #define PUBLISH_TOPIC_SIZE          80     //Defines the topic length when we send a publish packet 
-//TODO: Must be configurable from GUI
-// USE_MCHP_AWS_ENDPOINT macro needs to be changed to 1 if the endpoint is different than MCHP AWS account endpoint.
-// This check is required only if endpoint is updated in MCC and as such can be
-// easily handled by MQTT MCC backend.
-#define USE_MCHP_AWS_ENDPOINT  0
-// AWS_ENDPOINT_LEN macro should be populated by MCC by dynamically calculating the endpoint length.
-#define AWS_ENDPOINT_LEN 45
 #define MQTT_CID_LENGTH 41
 #define NUM_TOPICS_SUBSCRIBE        1                        //Defines number of topics which can be subscribed
 #define NUM_TOPICS_UNSUBSCRIBE      NUM_TOPICS_SUBSCRIBE	// The MQTT client can unsubscribe only from those topics to which it has already subscribed
@@ -50,8 +43,8 @@
 // MCC generated parameters
 #define CFG_MQTT_PORT 8883
 #define CFG_MQTT_HOSTURL "a1gqt8sttiign3.iot.us-east-2.amazonaws.com"
+#define CFG_MQTT_SERVERIPv4_HEX 0x00000000
 #define CFG_MQTT_CONN_TIMEOUT 10
-#define CFG_MQTT_BROKERIP 0x00000000
 #define CFG_MQTT_TXBUFFER_SIZE 400
 #define CFG_MQTT_RXBUFFER_SIZE 400
 #define CFG_MQTT_USERNAME "mchpUser"
@@ -60,7 +53,6 @@
 #define CFG_PUBTOPIC "mchp/iot/events"
 #define CFG_SUBTOPIC "mchp/iot/config"
 #define TCPIP_BSD 1
-
 
 /********************MQTT Client configurations*(END)***********************/
 
@@ -87,7 +79,6 @@
 #endif /* TCPIP_LITE */
 
 /*******************Timeout Driver for MQTT definitions*(END)******************/
-
 
 
 #endif	/* MQTT_CONFIG_H */

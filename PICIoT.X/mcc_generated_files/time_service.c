@@ -83,7 +83,7 @@ uint32_t TIME_getOffset_UNIX(void)
 
 char *TIME_GetcTime(uint32_t timeToConvert)
 {
-    return ctime((time_t)&timeToConvert);
+    return ctime((const time_t*)&timeToConvert);
 }
 
 int32_t TIME_getDiffTime(int32_t diffTime1, int32_t diffTime0)
@@ -91,7 +91,7 @@ int32_t TIME_getDiffTime(int32_t diffTime1, int32_t diffTime0)
 	return difftime((time_t)diffTime1, (time_t)diffTime0);
 }
 
-uint32_t TIME_ntpTimeStamp(tstrSystemTime* WINCTime)
+void TIME_ntpTimeStamp(tstrSystemTime* WINCTime)
 {
 	struct tm theTime;
 	uint32_t mkTimeResult = 0;

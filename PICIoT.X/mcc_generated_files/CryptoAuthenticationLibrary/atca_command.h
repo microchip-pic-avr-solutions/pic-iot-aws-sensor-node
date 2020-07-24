@@ -37,8 +37,9 @@
 #include "atca_compiler.h"
 #include "atca_status.h"
 #include "atca_devtypes.h"
-#include "cryptoauthlib_config.h" 
+#include "../cryptoauthlib_config.h"
 #include <stddef.h>
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -85,14 +86,17 @@ void deleteATCACommand(ATCACommand *ca_cmd);
 
 // Note: pack @ 2 is required, @ 1 causes word alignment crash (though it should not), a known bug in GCC.
 // @2, the wire still has the intended byte alignment with arm-eabi.  this is likely the least portable part of atca
-#if defined(__XC16__)||defined(__XC32__) 
-#pragma pack( push, ATCAPacket, 2 )
-#endif
 
+
+#ifdef ATCA_NO_PRAGMA_PACK
+typedef struct __attribute__ ((packed))
+#else
+#pragma pack( push, ATCAPacket, 2 )
+typedef struct
+#endif
 /** \brief an ATCA packet structure.  This is a superset of the packet transmitted on the wire.  It's also
  * used as a buffer for receiving the response
  */
-typedef struct
 {
 
     // used for transmit/send
@@ -117,7 +121,7 @@ typedef struct
 
 } ATCAPacket;
 
-#if defined(__XC16__)||defined(__XC32__) 
+#ifndef ATCA_NO_PRAGMA_PACK
 #pragma pack( pop, ATCAPacket)
 #endif
 
@@ -344,6 +348,7 @@ ATCA_STATUS atCheckCrc(const uint8_t *response);
 #define COUNTER_MODE_READ                   ((uint8_t)0x00)         //!< Counter command mode for reading
 #define COUNTER_MODE_INCREMENT              ((uint8_t)0x01)         //!< Counter command mode for incrementing
 #define COUNTER_RSP_SIZE                    ATCA_RSP_SIZE_4         //!< Counter command response packet size
+#define COUNTER_SIZE                        ATCA_RSP_SIZE_MIN       //!< Counter size in binary
 /** @} */
 
 /** \name Definitions for the DeriveKey Command

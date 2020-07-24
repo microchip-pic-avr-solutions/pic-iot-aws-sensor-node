@@ -42,6 +42,6 @@ void wifi_init(void (*funcPtr)(uint8_t), uint8_t  mode);
 void wifi_reinit();
 bool wifi_connectToAp(uint8_t passed_wifi_creds);
 bool wifi_disconnectFromAp(void);
-void wifi_readThingIdFromWinc(void);
+void wifi_readThingNameFromWinc(void);
 void wifi_readAWSEndpointFromWinc(void);
 #endif /* WIFI_SERVICE_H_ */

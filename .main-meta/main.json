@@ -1,0 +1,36 @@
+{
+    "metaDataVersion": "1.0.0",
+    "category": "com.microchip.ide.project",
+    "content": {
+        "metaDataVersion": "1.1.0",
+        "name": "com.microchip.mplabx.project.pic-iot-aws-sensor-node",
+        "version": "4.1.0",
+        "displayName": "PIC-IoT AWS Sensor Node",
+        "projectName": "pic-iot-aws-sensor-node",
+        "shortDescription": "Microchip PIC-IoT WA (Wireless for Amazon Web Services) Application Example",
+        "ide": {
+            "name": "MPLABX",
+            "semverRange": ">=5.40.0"
+        },
+        "compiler": [
+            {
+                "name": "xc16",
+                "semverRange": "^1.41.0"
+            }
+        ],
+        "dfp": {
+            "name": "PIC24F-GA-GB_DFP",
+            "semverRange": "^1.0.67"
+        },
+        "device": {
+            "metaDataVersion": "1.0.0",
+            "category": "com.microchip.portal.contentRef",
+            "content": {
+                "metaDataVersion": "1.0.0",
+                "category": "com.microchip.device",
+                "name": "PIC24FJ128GA705",
+                "versionRange": "*"
+            }
+        }
+    }
+}

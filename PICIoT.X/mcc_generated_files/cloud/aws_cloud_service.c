@@ -133,14 +133,25 @@ int8_t CLOUD_connectSocket(uint32_t ipAddress)
         if (socketState == SOCKET_CLOSED) 
         {
          debug_print("CLOUD: Connect socket");
-         ret = BSD_connect(*context->tcpClientSocket, (struct bsd_sockaddr *)&addr, sizeof(struct bsd_sockaddr_in));
-
-         if (ret != BSD_SUCCESS) 
+         
+         ret = BSD_setsockopt(*context->tcpClientSocket, BSD_SOL_SSL_SOCKET, BSD_SO_SSL_SNI, awsEndpoint, strlen(awsEndpoint));
+         if(ret == BSD_SUCCESS)
          {
-            debug_printError("CLOUD connect received %d",ret);
+             ret = BSD_connect(*context->tcpClientSocket, (struct bsd_sockaddr *)&addr, sizeof(struct bsd_sockaddr_in));
+
+             if (ret != BSD_SUCCESS) 
+             {
+                debug_printError("CLOUD connect received %d",ret);
             
-            BSD_close(*context->tcpClientSocket);
+                BSD_close(*context->tcpClientSocket);
+             }
+             
          }
+         else
+         {
+             debug_printError("CLOUD setsockopt received %d",ret);
+         }   
+         
       }
    }   
    return ret;

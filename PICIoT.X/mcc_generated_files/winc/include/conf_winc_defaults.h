@@ -96,6 +96,31 @@ void CONF_WINC_HIF_CB_SIGMA_HANDLER(uint8_t u8OpCode, uint16_t u16DataSize, uint
 #error Please define MCU endianness
 #endif
 
+#if defined(CONF_WINC_LARGE_MEMORY_ALLOC_STYLE_STACK) || defined(CONF_WINC_LARGE_MEMORY_ALLOC_STYLE_STATIC)
+#if defined(CONF_WINC_LARGE_MEMORY_ALLOC_FUNC) || defined(CONF_WINC_LARGE_MEMORY_FREE_FUNC)
+#error Do not define large memory alloc/free functions for stack/static allocation style
+#endif
+#elif defined(CONF_WINC_LARGE_MEMORY_ALLOC_STYLE_DYNAMIC)
+#ifndef CONF_WINC_LARGE_MEMORY_ALLOC_FUNC
+#define CONF_WINC_LARGE_MEMORY_ALLOC_FUNC   malloc
+#endif
+#ifndef CONF_WINC_LARGE_MEMORY_FREE_FUNC
+#define CONF_WINC_LARGE_MEMORY_FREE_FUNC    free
+#endif
+#else
+#define CONF_WINC_LARGE_MEMORY_ALLOC_STYLE_STACK
+#endif
+
+#ifndef CONF_WINC_LARGE_MEMORY_ALLOC_STYLE_DYNAMIC
+#ifndef CONF_WINC_ENTERPRISE_CONNECT_MEMORY_RESERVE_SIZE
+#define CONF_WINC_ENTERPRISE_CONNECT_MEMORY_RESERVE_SIZE    1500
+#endif
+#else
+#ifdef CONF_WINC_ENTERPRISE_CONNECT_MEMORY_RESERVE_SIZE
+#error Enterprise connect memory reservation size not required for dynamic memory style
+#endif
+#endif
+
 #ifndef CONF_WINC_HIF_STRUCT_SIZE_CHECK
 #ifdef __GNUC__
 #define CONF_WINC_HIF_STRUCT_SIZE_CHECK(STRUCTNAME) _Static_assert((sizeof(STRUCTNAME)%4)==0, "Structure alignment error");

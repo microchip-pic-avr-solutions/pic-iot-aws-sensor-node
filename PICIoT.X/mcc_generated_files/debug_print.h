@@ -61,25 +61,25 @@ typedef enum
    LEVEL_ERROR
 }debug_errorLevel_t;
 
-#include "banner.h"
-
-#define IOT_DEBUG_PRINT CFG_DEBUG_MSG
 
 void debug_printer(debug_severity_t debug_severity, debug_errorLevel_t error_level, char* format, ...);
 void debug_setSeverity(debug_severity_t debug_level);
 void debug_setPrefix(const char *prefix);
 void debug_init(const char *prefix);
 
+#define debug_printIoTAppMsg(fmt, ...) \
+do { if (ENABLE_DEBUG_IOT_APP_MSGS) debug_printer(SEVERITY_NONE, LEVEL_NORMAL, fmt CSI_RESET, ##__VA_ARGS__); } while (0)
+
 #define debug_print(fmt, ...) \
-do { if (IOT_DEBUG_PRINT) debug_printer(SEVERITY_DEBUG, LEVEL_NORMAL, fmt CSI_RESET, ##__VA_ARGS__); } while (0)
+do { if (CFG_DEBUG_PRINT) debug_printer(SEVERITY_DEBUG, LEVEL_NORMAL, fmt CSI_RESET, ##__VA_ARGS__); } while (0)
 
 #define debug_printGOOD(fmt, ...) \
-do { if (IOT_DEBUG_PRINT) debug_printer(SEVERITY_DEBUG,LEVEL_GOOD, fmt CSI_RESET,  ##__VA_ARGS__); } while (0)
+do { if (CFG_DEBUG_PRINT) debug_printer(SEVERITY_DEBUG,LEVEL_GOOD, fmt CSI_RESET,  ##__VA_ARGS__); } while (0)
 
 #define debug_printError(fmt, ...) \
-do { if (IOT_DEBUG_PRINT) debug_printer(SEVERITY_DEBUG,LEVEL_ERROR, fmt CSI_RESET, ##__VA_ARGS__); } while (0)
+do { if (CFG_DEBUG_PRINT) debug_printer(SEVERITY_DEBUG,LEVEL_ERROR, fmt CSI_RESET, ##__VA_ARGS__); } while (0)
 
 #define debug_printInfo(fmt, ...) \
-do { if (IOT_DEBUG_PRINT) debug_printer(SEVERITY_INFO,LEVEL_NORMAL, fmt CSI_RESET, ##__VA_ARGS__); } while (0)
+do { if (CFG_DEBUG_PRINT) debug_printer(SEVERITY_INFO,LEVEL_NORMAL, fmt CSI_RESET, ##__VA_ARGS__); } while (0)
 
 #endif // DEBUG_PRINT_H

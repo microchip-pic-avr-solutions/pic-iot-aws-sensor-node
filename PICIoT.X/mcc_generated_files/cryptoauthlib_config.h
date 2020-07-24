@@ -48,6 +48,10 @@
 #define ATCAPRINTF 1
 #endif
 
+#ifndef ATCA_USE_CONSTANT_HOST_NONCE
+#define ATCA_USE_CONSTANT_HOST_NONCE 1
+#endif
+
 #ifndef CONF_CRYPTOAUTHLIB_DEBUG_HELPER
 #define CONF_CRYPTOAUTHLIB_DEBUG_HELPER 0
 #endif
@@ -58,5 +62,6 @@
 #define ATCAdebug_print 1
 #endif
 #endif
+
 
 #endif // CRYPTOAUTHLIB_CONFIG_H

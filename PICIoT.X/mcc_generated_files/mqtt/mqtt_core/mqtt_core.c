@@ -845,6 +845,8 @@ static void mqttProcessPingresp(mqttContext *mqttConnectionPtr)
    memset(&txPingrespPacket, 0, sizeof (txPingrespPacket));
 
    MQTT_ExchangeBufferRead(&mqttConnectionPtr->mqttDataExchangeBuffers.rxbuff, &txPingrespPacket.pingFixedHeader.All, sizeof (txPingrespPacket.pingFixedHeader.All));
+   mqttRxFlags.newRxPingrespPacket = 0;
+
    // Reload timeout for keepAliveTimer
    // The timeout should be reloaded only if the keepAliveTimer is set
    // to a non-zero value.
@@ -1186,6 +1188,7 @@ mqttCurrentState MQTT_ReceptionHandler(mqttContext *mqttConnectionPtr)
                      // Send a PINGREQ packet after (keepAliveTimer - KEEP_ALIVE_CALCULATION_CONSTANT)s
                      // if keepAliveTime is non-zero
                      mqttTxFlags.newTxPingreqPacket = 1;
+                     mqttRxFlags.newRxPingrespPacket = 0;
                      // The timeout API names are different in MCC foundation
                      // services timeout driver and START timeout driver
                      timeout_create(&pingreqTimer, ((keepAliveTimeout - KEEP_ALIVE_CALCULATION_CONSTANT) * SECONDS));
@@ -1376,7 +1379,7 @@ static bool mqttSendPingreq(mqttContext *mqttConnectionPtr)
        mqttRxFlags.newRxPingrespPacket = 1;
        // The client expects the server to send a PINGRESP within
        // keepAliveTimer value.
-       
+       mqttTimeouts.pingrespTimeoutOccured = 0;
        //The timeout API names are different in MCC foundation
        //services timeout driver and START timeout driver
        timeout_create(&pingrespTimer, (WAITFORPINGRESP_TIMEOUT));

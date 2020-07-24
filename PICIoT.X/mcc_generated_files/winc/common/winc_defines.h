@@ -57,7 +57,6 @@
 #define M2M_NOT_YET                 (-7)
 #define M2M_ERR_FIRMWARE            (-8)
 #define M2M_SPI_FAIL                (-9)
-#define M2M_ERR_FIRMWARE_bURN       (-10)
 #define M2M_ACK                     (-11)
 #define M2M_ERR_FAIL                (-12)
 #define M2M_ERR_FW_VER_MISMATCH     (-13)
