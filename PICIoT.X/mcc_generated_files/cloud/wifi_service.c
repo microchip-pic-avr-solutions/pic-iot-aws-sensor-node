@@ -152,7 +152,7 @@ void wifi_readThingNameFromWinc(void)
         debug_printInfo("WINC in download mode");
         		
 	    status = spi_flash_read((uint8_t*)cid, THING_NAME_FLASH_OFFSET,MQTT_CID_LENGTH);        
-        if(status != M2M_SUCCESS || cid[0] == 0xFF || cid[MQTT_CID_LENGTH-1] == 0xFF)
+        if(status != M2M_SUCCESS || (((uint8_t)cid[0]) == 0xFF) || (((uint8_t)cid[MQTT_CID_LENGTH-1]) == 0xFF))
         {
             sprintf(cid, "%s", AWS_THING_NAME); 
             debug_printIoTAppMsg("Thing Name is not present, error type %d, user defined thing ID is used",status);
@@ -183,7 +183,7 @@ void wifi_readAWSEndpointFromWinc(void)
         {
             debug_printError("Error reading AWS Endpoint from WINC");
         }
-        else if(awsEndpoint[0] == 0xFF)
+        else if(((uint8_t)awsEndpoint[0]) == 0xFF)
         {
             debug_printIoTAppMsg("AWS Endpoint is not present in WINC, either re-provision or microchip AWS sandbox endpoint will be used");
         }
