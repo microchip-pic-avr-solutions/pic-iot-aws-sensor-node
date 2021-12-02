@@ -355,7 +355,7 @@ void loadDefaultAWSEndpoint(void)
 {
     memset(awsEndpoint, '\0', AWS_ENDPOINT_LEN);
     wifi_readAWSEndpointFromWinc();
-    if(awsEndpoint[0] == 0xFF)
+    if(((uint8_t)awsEndpoint[0]) == 0xFF)
     {
         sprintf(awsEndpoint, "%s", AWS_MCHP_SANDBOX_URL);
         debug_printIoTAppMsg("Using the AWS Sandbox endpoint : %s", awsEndpoint);

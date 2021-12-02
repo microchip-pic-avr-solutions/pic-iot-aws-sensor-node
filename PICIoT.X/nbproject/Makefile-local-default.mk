@@ -14,23 +14,24 @@
 # You can invoke make with the values of the macros:
 # $ makeMP_CC="/opt/microchip/mplabc30/v3.30c/bin/pic30-gcc" ...  
 #
-PATH_TO_IDE_BIN=/opt/microchip/mplabx/v5.25/mplab_platform/platform/../mplab_ide/modules/../../bin/
+PATH_TO_IDE_BIN=/opt/microchip/mplabx/v5.40/mplab_platform/platform/../mplab_ide/modules/../../bin/
 # Adding MPLAB X bin directory to path.
-PATH:=/opt/microchip/mplabx/v5.25/mplab_platform/platform/../mplab_ide/modules/../../bin/:$(PATH)
+PATH:=/opt/microchip/mplabx/v5.40/mplab_platform/platform/../mplab_ide/modules/../../bin/:$(PATH)
 # Path to java used to run MPLAB X when this makefile was created
-MP_JAVA_PATH="/opt/microchip/mplabx/v5.25/sys/java/jre1.8.0_181/bin/"
+MP_JAVA_PATH="/opt/microchip/mplabx/v5.40/sys/java/zulu8.36.0.1-ca-fx-jdk8.0.202-linux_x64/jre/bin/"
 OS_CURRENT="$(shell uname -s)"
-MP_CC="/opt/microchip/xc16/v1.41/bin/xc16-gcc"
+MP_CC="/opt/microchip/xc16/v1.60/bin/xc16-gcc"
 # MP_CPPC is not defined
 # MP_BC is not defined
-MP_AS="/opt/microchip/xc16/v1.41/bin/xc16-as"
-MP_LD="/opt/microchip/xc16/v1.41/bin/xc16-ld"
-MP_AR="/opt/microchip/xc16/v1.41/bin/xc16-ar"
-DEP_GEN=${MP_JAVA_PATH}java -jar "/opt/microchip/mplabx/v5.25/mplab_platform/platform/../mplab_ide/modules/../../bin/extractobjectdependencies.jar"
-MP_CC_DIR="/opt/microchip/xc16/v1.41/bin"
+MP_AS="/opt/microchip/xc16/v1.60/bin/xc16-as"
+MP_LD="/opt/microchip/xc16/v1.60/bin/xc16-ld"
+MP_AR="/opt/microchip/xc16/v1.60/bin/xc16-ar"
+DEP_GEN=${MP_JAVA_PATH}java -jar "/opt/microchip/mplabx/v5.40/mplab_platform/platform/../mplab_ide/modules/../../bin/extractobjectdependencies.jar"
+MP_CC_DIR="/opt/microchip/xc16/v1.60/bin"
 # MP_CPPC_DIR is not defined
 # MP_BC_DIR is not defined
-MP_AS_DIR="/opt/microchip/xc16/v1.41/bin"
-MP_LD_DIR="/opt/microchip/xc16/v1.41/bin"
-MP_AR_DIR="/opt/microchip/xc16/v1.41/bin"
+MP_AS_DIR="/opt/microchip/xc16/v1.60/bin"
+MP_LD_DIR="/opt/microchip/xc16/v1.60/bin"
+MP_AR_DIR="/opt/microchip/xc16/v1.60/bin"
 # MP_BC_DIR is not defined
+DFP_DIR=/opt/microchip/mplabx/v5.40/packs/Microchip/PIC24F-GA-GB_DFP/1.3.109

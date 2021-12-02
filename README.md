@@ -45,7 +45,7 @@ Devices: \| **PIC24FJ128GA705(MCU)** \| **WINC1510(Wi-Fi®)** \| **ECC608(Crypto
   6. After successfully establishing MQTT connection, the **YELLOW LED** will blink. (250 mSec)
      + Indicating data exchanged between the End-Device (PIC-IoT), and BROKER (AWS). (every (1) Sec)
 
-  7. Connect to the www.avr-iot.com/aws/**{thingName}**, or www.pic-iot.com/aws/**{thingName}** website to view publish/subscribe data. 
+  7. Connect to the www.pic-iot.com/pic-iot/aws/**{thingName}** website to view publish/subscribe data. 
      + **{thingName}** is the unique identifier for the development board.
      + This page can be also be found via launching the **CLICK-ME.HTM** file on the **CURIOSITY** device.
      + This page can be also be found by scanning the QR code on the back of the development board. 
@@ -99,6 +99,9 @@ Compilation of source code can be achieved using supporting MPLAB® XC compiler:
  * XC16 Compiler v1.41 or later: Supported by optimization **level -O0, -O1 (free)** and **-O2, -Os (pro)**
 
 MPLAB® X IDE XC16 support all 16-bit PIC® microcontrollers (MCUs). This is a internally developed compiler which is specially designed to maximize features available to the PIC® microcontrollers (MCUs).
+
++ **MPLAB® Code Configurator (MCC) Not Supported**:
+This PIC-IoT demonstration does not support reconfiguration of peripherals using MCC.
 
 + **PIC IoT Development Board**:
 The PIC-IoT development board combines a powerful 16-bit PIC24FJ128GA705 MCU, an ATECC608A CryptoAuthentication™ secure element IC and the fully certified ATWINC1510 Wi-Fi® network controller - which provides the most simple and effective way to connect your embedded application to a cloud platform. The board also includes an on-board debugger and requires no external hardware to program and debug the MCU.
@@ -288,7 +291,7 @@ General Out-Of-Box operation is as described below:
      
      ![URL Hosted Credentials](images/wifiCredentialsWeb.png)
 
-     + This will launch the URL: https://pic-iot.com/aws/{ThingName}. 
+     + This will launch the URL: https://pic-iot.com/pic-iot/aws/{ThingName}. 
      + After entering credentials, the **.CFG** file is produced through the web browser. No information is shared through the internet. 
      + Drag and Drop, or Copy and Paste the **WIFI.CFG** file onto the **CURIOSITY** device to load new credentials onto the IoT demonstration board.
 	 
@@ -385,7 +388,7 @@ The PIC-IoT development board can be accessed through a Wi-Fi access point enabl
 ![Soft AP Credentials](images/softApCredentials.png)
 
 ### AWS Multi Account Registration
-This [feature](https://pages.awscloud.com/iot-core-early-registration.html) is in Beta phase. The user can leverage upon the [provisioning tool](http://ww1.microchip.com/downloads/en/DeviceDoc/iotprovision-bin-1.1.11.4.zip) to register existing PIC-IoT board
+This [feature](https://pages.awscloud.com/iot-core-early-registration.html) is in Beta phase. The user can leverage upon the [provisioning tool](https://www.microchip.com/mymicrochip/filehandler.aspx?ddocname=en1001525) to register existing PIC-IoT board
 in a personal account. More information on using the provisioning tool can be found in README.txt and iotprovsion.md which are part of the tool.
 
 By default the AWS endpoint URL is read from WINC's memory. Upon using the provisioning tool the Microchip
