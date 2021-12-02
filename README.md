@@ -100,6 +100,9 @@ Compilation of source code can be achieved using supporting MPLAB® XC compiler:
 
 MPLAB® X IDE XC16 support all 16-bit PIC® microcontrollers (MCUs). This is a internally developed compiler which is specially designed to maximize features available to the PIC® microcontrollers (MCUs).
 
++ **MPLAB® Code Configurator (MCC) Not Supported**:
+This PIC-IoT demonstration does not support reconfiguration of peripherals using MCC.
+
 + **PIC IoT Development Board**:
 The PIC-IoT development board combines a powerful 16-bit PIC24FJ128GA705 MCU, an ATECC608A CryptoAuthentication™ secure element IC and the fully certified ATWINC1510 Wi-Fi® network controller - which provides the most simple and effective way to connect your embedded application to a cloud platform. The board also includes an on-board debugger and requires no external hardware to program and debug the MCU.
 
